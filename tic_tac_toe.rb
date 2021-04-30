@@ -47,6 +47,7 @@ class Game
   def setup
     # p1 passes nil for symbol, p2 passes p1's selection as symbol
     2.times { |i| setup_player(i + 1, i == 1 ? @players[0].symbol : nil) }
+    @players[0], @players[1] = @players[1], @players[0] if rand < 0.5
   end
 
   def start
