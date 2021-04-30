@@ -4,8 +4,9 @@
 class Player
   attr_reader :name, :symbol
 
-  def initialize(player_number)
-    @symbols = %i[O X $ # % & @]
+  # symbol is nil for p1 and the symbol p1 selected for p2
+  def initialize(player_number, symbol)
+    @symbols = %i[O X $ # % & @].reject { |sym| sym == symbol }
     init_name(player_number)
     init_symbol
   end
@@ -22,11 +23,17 @@ class Player
     @name = gets.chomp
   end
 
-  # TODO: prevent duplicate symbol selection and incorrect symbol selection
   def init_symbol
     print "Thank you, #{@name}. What symbol would you like to use? "
     p "(#{@symbols.join(', ')})"
-    @symbol = gets.chomp
+    @symbol = gets.chomp.to_sym
+
+    until @symbols.include?(@symbol)
+      puts "That symbol wasn't valid."
+      print 'What symbol would you like to use? '
+      p "(#{@symbols.join(', ')})"
+      @symbol = gets.chomp.to_sym
+    end
   end
 end
 
@@ -38,7 +45,8 @@ class Game
   end
 
   def setup
-    2.times { |i| setup_player(i + 1) }
+    # p1 passes nil for symbol, p2 passes p1's selection as symbol
+    2.times { |i| setup_player(i + 1, i == 1 ? @players[0].symbol : nil) }
   end
 
   def start
@@ -66,6 +74,7 @@ class Game
   def new_game?
     puts 'Would you like to play a new game? (y/n)'
     answer = gets.chomp
+
     until %i[y n].include?(answer.to_sym)
       puts 'That was not a valid selection!'
       puts 'Would you like to play a new game? (y/n)'
@@ -105,10 +114,11 @@ class Game
       [0, 4, 8], [2, 4, 6]
     ]
 
-    winning_configs.any? { |config| config.all? { |i| @board[i] == symbol } }
+    winning_configs.any? { |config| config.all? { |i| @board[i].to_sym == symbol } }
   end
 
   def valid_selection?(selection)
+    # need .chars to make sure for eg. '12' doesn't match
     single_number = '123456789'.chars.include?(selection)
     '123456789'.include?(@board.slice(selection.to_i - 1)) if single_number
   end
@@ -117,6 +127,7 @@ class Game
     temp = @board.split('')
     temp[selection - 1] = symbol
     @board = temp.join
+
     game_over?
   end
 
@@ -146,8 +157,8 @@ class Game
     apply_selection(player.symbol, selection.to_i)
   end
 
-  def setup_player(player_number)
-    @players.push(Player.new(player_number))
+  def setup_player(player_number, symbol)
+    @players.push(Player.new(player_number, symbol))
   end
 end
 
@@ -160,4 +171,5 @@ while play_again
   play_again = game.start
 end
 
+puts ''
 puts 'Thank you for playing Tic-Tac-Toe!'
