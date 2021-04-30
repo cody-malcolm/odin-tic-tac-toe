@@ -31,3 +31,7 @@ board just stored as a String at the Game level, and it worked perfectly fine, s
 suspect I could convert more of the program to using symbols instead of Strings, and that doing such would be more
 "Ruby". This is a relatively trivial exercise, though, so I'll just keep it in mind for later projects as I get more
 accustomed to Ruby.
+
+## Live Demo
+
+Try it out [here](https://replit.com/@CodyMalcolm/odin-tic-tac-toe).
