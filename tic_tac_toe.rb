@@ -44,13 +44,24 @@ class Game
   def start
     puts ''
     puts 'Game is started.'
-    puts ''
-    9.times { |i| handle_turn(@players[i % 2]) }
+
+    play_game
+
     display_result
     new_game?
   end
 
   private
+
+  def play_game
+    finished = false
+    i = 0
+
+    until finished
+      finished = handle_turn(@players[i % 2])
+      i += 1
+    end
+  end
 
   def new_game?
     puts 'Would you like to play a new game? (y/n)'
@@ -76,7 +87,25 @@ class Game
 
   def display_result
     puts 'The game is over'
-    puts ''
+    display_board
+    if winner_found?
+      winning_player = player_won?(@players[0]) ? @players[0] : @players[1]
+      puts "#{winning_player.name} won the game!"
+    else
+      puts 'The game was a draw!'
+    end
+  end
+
+  def player_won?(player)
+    symbol = player.symbol
+    winning_configs = [
+      [0, 1, 2], [0, 3, 6],
+      [3, 4, 5], [1, 4, 7],
+      [6, 7, 8], [2, 5, 8],
+      [0, 4, 8], [2, 4, 6]
+    ]
+
+    winning_configs.any? { |config| config.all? { |i| @board[i] == symbol } }
   end
 
   def valid_selection?(selection)
@@ -88,6 +117,19 @@ class Game
     temp = @board.split('')
     temp[selection - 1] = symbol
     @board = temp.join
+    game_over?
+  end
+
+  def game_over?
+    winner_found? || board_full?
+  end
+
+  def winner_found?
+    player_won?(@players[0]) || player_won?(@players[1])
+  end
+
+  def board_full?
+    @board.chars.none?(/\d/)
   end
 
   def handle_turn(player)
