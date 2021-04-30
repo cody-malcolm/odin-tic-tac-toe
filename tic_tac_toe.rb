@@ -10,6 +10,11 @@ class Player
     init_symbol
   end
 
+  def move_selection
+    puts "#{@name}, please select a square for your next move."
+    gets.chomp
+  end
+
   private
 
   def init_name(number)
@@ -17,7 +22,7 @@ class Player
     @name = gets.chomp
   end
 
-  # TODO: prevent duplicate symbol selection
+  # TODO: prevent duplicate symbol selection and incorrect symbol selection
   def init_symbol
     print "Thank you, #{@name}. What symbol would you like to use? "
     p "(#{@symbols.join(', ')})"
@@ -29,6 +34,7 @@ end
 class Game
   def initialize
     @players = []
+    @board = '123456789'
   end
 
   def setup
@@ -36,15 +42,67 @@ class Game
   end
 
   def start
-    puts 'Game is started. Players are: '
-    puts @players[0].name
-    puts @players[0].symbol
-    puts @players[1].name
-    puts @players[1].symbol
-    false
+    puts ''
+    puts 'Game is started.'
+    puts ''
+    9.times { |i| handle_turn(@players[i % 2]) }
+    display_result
+    new_game?
   end
 
   private
+
+  def new_game?
+    puts 'Would you like to play a new game? (y/n)'
+    answer = gets.chomp
+    until %i[y n].include?(answer.to_sym)
+      puts 'That was not a valid selection!'
+      puts 'Would you like to play a new game? (y/n)'
+      answer = gets.chomp
+    end
+
+    answer == 'y'
+  end
+
+  def display_board
+    puts ''
+    puts "    #{@board.slice(0)} | #{@board.slice(1)} | #{@board.slice(2)}"
+    puts '   -----------'
+    puts "    #{@board.slice(3)} | #{@board.slice(4)} | #{@board.slice(5)}"
+    puts '   -----------'
+    puts "    #{@board.slice(6)} | #{@board.slice(7)} | #{@board.slice(8)}"
+    puts ''
+  end
+
+  def display_result
+    puts 'The game is over'
+    puts ''
+  end
+
+  def valid_selection?(selection)
+    single_number = '123456789'.chars.include?(selection)
+    '123456789'.include?(@board.slice(selection.to_i - 1)) if single_number
+  end
+
+  def apply_selection(symbol, selection)
+    temp = @board.split('')
+    temp[selection - 1] = symbol
+    @board = temp.join
+  end
+
+  def handle_turn(player)
+    display_board
+
+    selection = player.move_selection
+
+    until valid_selection?(selection)
+      puts 'That was not a valid selection!'
+      display_board
+      selection = player.move_selection
+    end
+
+    apply_selection(player.symbol, selection.to_i)
+  end
 
   def setup_player(player_number)
     @players.push(Player.new(player_number))
